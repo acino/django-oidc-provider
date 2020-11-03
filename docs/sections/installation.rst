@@ -6,17 +6,17 @@ Installation
 Requirements
 ============
 
-* Python: ``2.7`` ``3.4`` ``3.5`` ``3.6``
-* Django: ``1.11`` ``2.0`` ``2.1``
+* Python: ``3.8``
+* Django: ``2.2`` ``3.0`` ``3.1``
 
 Quick Installation
 ==================
 
-If you want to get started fast see our ``/example`` folder in your local installation. Or look at it `on github <https://github.com/juanifioren/django-oidc-provider/tree/master/example>`_.
+If you want to get started fast see our ``/example`` folder in your local installation. Or look at it `on github <https://github.com/sawadashota/django-oidc-provider/tree/main/example>`_.
 
 Install the package using pip::
 
-    $ pip install django-oidc-provider
+    $ pip install django-oidc-provider2
 
 Add it to your apps in your project's django settings::
 

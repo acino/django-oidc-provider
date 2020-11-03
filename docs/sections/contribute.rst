@@ -21,11 +21,11 @@ Use `tox <https://pypi.python.org/pypi/tox>`_ for running tests in each of the e
     # Run all tests.
     $ tox
 
-    # Run with Python 3.5 and Django 2.0.
-    $ tox -e py35-django20
+    # Run with Python 3.8 and Django 3.1.
+    $ tox -e py38-django31
 
     # Run single test file on specific environment.
-    $ tox -e py35-django20 tests/cases/test_authorize_endpoint.py
+    $ tox -e py38-django31 tests/cases/test_authorize_endpoint.py
 
 We also use `travis <https://travis-ci.org/juanifioren/django-oidc-provider/>`_ to automatically test every commit to the project.
 
