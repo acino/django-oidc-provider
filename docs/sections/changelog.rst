@@ -8,6 +8,13 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+0.8.1
+=====
+
+* Fixed: deprecation warning at Django 3.1.
+* Fixed: example project on Django 3.1.
+* Fixed: Improve logging.
+
 0.8.0
 =====
 
