@@ -31,24 +31,3 @@ $ python manage.py runserver
 ```
 
 Open your browser and go to `http://localhost:8000`. Voilà!
-
-### Using Docker
-
-Build and run the container.
-
-```bash
-$ docker build -t django-oidc-provider .
-$ docker run -d -p 8000:8000 django-oidc-provider
-```
-
-## Install package for development
-
-After you run `pip install -r requirements.txt`.
-```bash
-# Remove pypi package.
-$ pip uninstall django-oidc-provider
-
-# Go back to django-oidc-provider/ folder and add the package on editable mode.
-$ cd ..
-$ pip install -e .
-```

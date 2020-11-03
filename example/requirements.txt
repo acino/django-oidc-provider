@@ -1,2 +1,2 @@
-django
-https://github.com/sawadashota/django-oidc-provider/archive/master.zip
+django==3.1
+django-oidc-provider2
