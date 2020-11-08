@@ -8,6 +8,12 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+0.8.2
+=====
+
+* Fixed: Add type hint.
+* Fixed: upgrading pre-Django 1.10-style middleware.
+
 0.8.1
 =====
 
