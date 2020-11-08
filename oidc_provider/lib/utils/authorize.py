@@ -1,11 +1,8 @@
-try:
-    from urllib import urlencode
-    from urlparse import urlsplit, parse_qs, urlunsplit
-except ImportError:
-    from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
+from typing import AnyStr
+from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
 
 
-def strip_prompt_login(path):
+def strip_prompt_login(path: str) -> AnyStr:
     """
     Strips 'login' from the 'prompt' query parameter.
     """

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import base64
 import binascii
 from hashlib import md5, sha256
 import json
-
+from typing import Tuple, List, Optional, Dict, Any
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-
 
 CLIENT_TYPE_CHOICES = [
     ('confidential', 'Confidential'),
@@ -31,7 +32,7 @@ JWT_ALGS = [
 
 
 class ResponseTypeManager(models.Manager):
-    def get_by_natural_key(self, value):
+    def get_by_natural_key(self, value) -> ResponseType:
         return self.get(value=value)
 
 
@@ -47,10 +48,10 @@ class ResponseType(models.Model):
         max_length=50,
     )
 
-    def natural_key(self):
+    def natural_key(self) -> Tuple[str]:
         return self.value,  # natural_key must return tuple
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{0}'.format(self.description)
 
 
@@ -116,45 +117,45 @@ class Client(models.Model):
         verbose_name = _('Client')
         verbose_name_plural = _('Clients')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{0}'.format(self.name)
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self.__str__()
 
     def response_type_values(self):
         return (response_type.value for response_type in self.response_types.all())
 
-    def response_type_descriptions(self):
+    def response_type_descriptions(self) -> List[str]:
         # return as a list, rather than a generator, so descriptions display correctly in admin
         return [response_type.description for response_type in self.response_types.all()]
 
     @property
-    def redirect_uris(self):
+    def redirect_uris(self) -> List[str]:
         return self._redirect_uris.splitlines()
 
     @redirect_uris.setter
-    def redirect_uris(self, value):
+    def redirect_uris(self, value: str) -> None:
         self._redirect_uris = '\n'.join(value)
 
     @property
-    def post_logout_redirect_uris(self):
+    def post_logout_redirect_uris(self) -> List[str]:
         return self._post_logout_redirect_uris.splitlines()
 
     @post_logout_redirect_uris.setter
-    def post_logout_redirect_uris(self, value):
+    def post_logout_redirect_uris(self, value: str) -> None:
         self._post_logout_redirect_uris = '\n'.join(value)
 
     @property
-    def scope(self):
+    def scope(self) -> List[str]:
         return self._scope.split()
 
     @scope.setter
-    def scope(self, value):
+    def scope(self, value: str) -> None:
         self._scope = ' '.join(value)
 
     @property
-    def default_redirect_uri(self):
+    def default_redirect_uri(self) -> str:
         return self.redirect_uris[0] if self.redirect_uris else ''
 
 
@@ -168,17 +169,17 @@ class BaseCodeTokenModel(models.Model):
         abstract = True
 
     @property
-    def scope(self):
+    def scope(self) -> List[str]:
         return self._scope.split()
 
     @scope.setter
-    def scope(self, value):
+    def scope(self, value: str):
         self._scope = ' '.join(value)
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self.__str__()
 
-    def has_expired(self):
+    def has_expired(self) -> bool:
         return timezone.now() >= self.expires_at
 
 
@@ -214,18 +215,18 @@ class Token(BaseCodeTokenModel):
         verbose_name_plural = _('Tokens')
 
     @property
-    def id_token(self):
+    def id_token(self) -> Optional[str]:
         return json.loads(self._id_token) if self._id_token else None
 
     @id_token.setter
-    def id_token(self, value):
+    def id_token(self, value: Dict[str, Any]) -> None:
         self._id_token = json.dumps(value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{0} - {1}'.format(self.client, self.access_token)
 
     @property
-    def at_hash(self):
+    def at_hash(self) -> str:
         # @@@ d-o-p only supports 256 bits (change this if that changes)
         hashed_access_token = sha256(
             self.access_token.encode('ascii')
@@ -256,12 +257,12 @@ class RSAKey(models.Model):
         verbose_name = _('RSA Key')
         verbose_name_plural = _('RSA Keys')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{0}'.format(self.kid)
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self.__str__()
 
     @property
-    def kid(self):
+    def kid(self) -> str:
         return '{0}'.format(md5(self.key.encode('utf-8')).hexdigest() if self.key else '')

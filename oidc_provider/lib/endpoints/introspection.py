@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, Any
 
 from django.http import JsonResponse
 
@@ -23,14 +24,14 @@ class TokenIntrospectionEndpoint(object):
         self.client = None
         self._extract_params()
 
-    def _extract_params(self):
+    def _extract_params(self) -> None:
         # Introspection only supports POST requests
         self.params['token'] = self.request.POST.get('token')
         client_id, client_secret = extract_client_auth(self.request)
         self.params['client_id'] = client_id
         self.params['client_secret'] = client_secret
 
-    def validate_params(self):
+    def validate_params(self) -> None:
         if not (self.params['client_id'] and self.params['client_secret']):
             logger.debug('[Introspection] No client credentials provided')
             raise TokenIntrospectionError()
@@ -78,7 +79,7 @@ class TokenIntrospectionEndpoint(object):
                              self.params['client_id'], audience)
                 raise TokenIntrospectionError()
 
-    def create_response_dic(self):
+    def create_response_dic(self) -> Dict[str, Any]:
         response_dic = {}
         if self.id_token:
             for k in ('aud', 'sub', 'exp', 'iat', 'iss'):

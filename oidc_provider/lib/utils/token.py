@@ -1,8 +1,10 @@
 from datetime import timedelta
 import time
 import uuid
+from typing import List, Optional
 
 from Cryptodome.PublicKey.RSA import importKey
+from django.http import HttpRequest
 from django.utils import dateformat, timezone
 from jwkest.jwk import RSAKey as jwk_RSAKey
 from jwkest.jwk import SYMKey
@@ -14,12 +16,20 @@ from oidc_provider.lib.claims import StandardScopeClaims
 from oidc_provider.models import (
     Code,
     RSAKey,
-    Token,
+    Token, Client,
 )
 from oidc_provider import settings
 
 
-def create_id_token(token, user, aud, nonce='', at_hash='', request=None, scope=None):
+def create_id_token(
+        token,
+        user,
+        aud,
+        nonce: str = '',
+        at_hash: str = '',
+        request: HttpRequest = None,
+        scope=None
+):
     """
     Creates the id_token dictionary.
     See: http://openid.net/specs/openid-connect-core-1_0.html#IDToken
@@ -69,7 +79,7 @@ def create_id_token(token, user, aud, nonce='', at_hash='', request=None, scope=
     return dic
 
 
-def encode_id_token(payload, client):
+def encode_id_token(payload, client: Client) -> str:
     """
     Represent the ID Token as a JSON Web Token (JWT).
     Return a hash.
@@ -79,7 +89,7 @@ def encode_id_token(payload, client):
     return _jws.sign_compact(keys)
 
 
-def decode_id_token(token, client):
+def decode_id_token(token, client: Client):
     """
     Represent the ID Token as a JSON Web Token (JWT).
     Return a hash.
@@ -88,7 +98,7 @@ def decode_id_token(token, client):
     return JWS().verify_compact(token, keys=keys)
 
 
-def client_id_from_id_token(id_token):
+def client_id_from_id_token(id_token) -> Optional[str]:
     """
     Extracts the client id from a JSON Web Token (JWT).
     Returns a string or None.
@@ -102,7 +112,7 @@ def client_id_from_id_token(id_token):
     return aud
 
 
-def create_token(user, client, scope, id_token_dic=None):
+def create_token(user, client: Client, scope, id_token_dic=None) -> Token:
     """
     Create and populate a Token object.
     Return a Token object.
@@ -123,8 +133,8 @@ def create_token(user, client, scope, id_token_dic=None):
     return token
 
 
-def create_code(user, client, scope, nonce, is_authentication,
-                code_challenge=None, code_challenge_method=None):
+def create_code(user, client: Client, scope: List[str], nonce: str, is_authentication: bool,
+                code_challenge: str = None, code_challenge_method: str = None) -> Code:
     """
     Create and populate a Code object.
     Return a Code object.
@@ -148,7 +158,7 @@ def create_code(user, client, scope, nonce, is_authentication,
     return code
 
 
-def get_client_alg_keys(client):
+def get_client_alg_keys(client: Client):
     """
     Takes a client and returns the set of keys associated with it.
     Returns a list of keys.

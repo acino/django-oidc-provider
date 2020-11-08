@@ -1,7 +1,8 @@
 import copy
+from typing import List, Dict, Any
 
 from django.utils.translation import gettext_lazy as _
-
+from oidc_provider.models import Token
 from oidc_provider import settings
 
 
@@ -37,7 +38,7 @@ STANDARD_CLAIMS = {
 
 class ScopeClaims(object):
 
-    def __init__(self, token):
+    def __init__(self, token: Token):
         self.user = token.user
         claims = copy.deepcopy(STANDARD_CLAIMS)
         self.userinfo = settings.get('OIDC_USERINFO', import_str=True)(claims, self.user)
@@ -61,7 +62,7 @@ class ScopeClaims(object):
 
         return dic
 
-    def _scopes_registered(self):
+    def _scopes_registered(self) -> List[str]:
         """
         Return a list that contains all the scopes registered
         in the class.
@@ -93,7 +94,7 @@ class ScopeClaims(object):
         return aux_dic
 
     @classmethod
-    def get_scopes_info(cls, scopes=None):
+    def get_scopes_info(cls, scopes=None) -> List[Dict[str, str]]:
         if scopes is None:
             scopes = []
         scopes_info = []
@@ -124,7 +125,7 @@ class StandardScopeClaims(ScopeClaims):
           'and other information.'),
     )
 
-    def scope_profile(self):
+    def scope_profile(self) -> Dict[str, Any]:
         dic = {
             'name': self.userinfo.get('name'),
             'given_name': (self.userinfo.get('given_name') or
@@ -151,7 +152,7 @@ class StandardScopeClaims(ScopeClaims):
         _('Access to your email address.'),
     )
 
-    def scope_email(self):
+    def scope_email(self) -> Dict[str, Any]:
         dic = {
             'email': self.userinfo.get('email') or getattr(self.user, 'email', None),
             'email_verified': self.userinfo.get('email_verified'),
@@ -164,7 +165,7 @@ class StandardScopeClaims(ScopeClaims):
         _('Access to your phone number.'),
     )
 
-    def scope_phone(self):
+    def scope_phone(self) -> Dict[str, Any]:
         dic = {
             'phone_number': self.userinfo.get('phone_number'),
             'phone_number_verified': self.userinfo.get('phone_number_verified'),
@@ -177,7 +178,7 @@ class StandardScopeClaims(ScopeClaims):
         _('Access to your address. Includes country, locality, street and other information.'),
     )
 
-    def scope_address(self):
+    def scope_address(self) -> Dict[str, Dict[str, Any]]:
         dic = {
             'address': {
                 'formatted': self.userinfo.get('address', {}).get('formatted'),

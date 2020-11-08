@@ -4,13 +4,9 @@ from hashlib import (
     sha256,
 )
 import logging
-try:
-    from urllib import urlencode
-    from urlparse import urlsplit, parse_qs, urlunsplit
-except ImportError:
-    from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
+from typing import AnyStr, List, Dict
+from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
 from uuid import uuid4
-
 from django.utils import timezone
 
 from oidc_provider.lib.claims import StandardScopeClaims
@@ -59,7 +55,7 @@ class AuthorizeEndpoint(object):
         # Determine if it's an OpenID Authentication request (or OAuth2).
         self.is_authentication = 'openid' in self.params['scope']
 
-    def _extract_params(self):
+    def _extract_params(self) -> None:
         """
         Get all the params used by the Authorization Code Flow
         (and also for the Implicit and Hybrid).
@@ -84,7 +80,7 @@ class AuthorizeEndpoint(object):
         self.params['code_challenge'] = query_dict.get('code_challenge', '')
         self.params['code_challenge_method'] = query_dict.get('code_challenge_method', '')
 
-    def validate_params(self):
+    def validate_params(self) -> None:
         # Client validation.
         try:
             self.client = self.client_class.objects.get(client_id=self.params['client_id'])
@@ -126,7 +122,7 @@ class AuthorizeEndpoint(object):
                 raise AuthorizeError(
                     self.params['redirect_uri'], 'invalid_request', self.grant_type)
 
-    def create_response_uri(self):
+    def create_response_uri(self) -> AnyStr:
         uri = urlsplit(self.params['redirect_uri'])
         query_params = parse_qs(uri.query)
         query_fragment = {}
@@ -227,7 +223,7 @@ class AuthorizeEndpoint(object):
 
         return urlunsplit(uri)
 
-    def set_client_user_consent(self):
+    def set_client_user_consent(self) -> None:
         """
         Save the user consent given to a specific client.
 
@@ -254,7 +250,7 @@ class AuthorizeEndpoint(object):
 
         uc.save()
 
-    def client_has_user_consent(self):
+    def client_has_user_consent(self) -> bool:
         """
         Check if already exists user consent for some client.
 
@@ -270,7 +266,7 @@ class AuthorizeEndpoint(object):
 
         return value
 
-    def get_scopes_information(self):
+    def get_scopes_information(self) -> List[Dict[str, str]]:
         """
         Return a list with the description of all the scopes requested.
         """

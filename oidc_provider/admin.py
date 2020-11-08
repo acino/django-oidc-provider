@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.forms import ModelForm
 from django.contrib import admin
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from oidc_provider.models import Client, Code, Token, RSAKey
@@ -22,14 +23,14 @@ class ClientForm(ModelForm):
         self.fields['client_secret'].required = False
         self.fields['client_secret'].widget.attrs['disabled'] = 'true'
 
-    def clean_client_id(self):
+    def clean_client_id(self) -> str:
         instance = getattr(self, 'instance', None)
         if instance and instance.pk:
             return instance.client_id
         else:
             return str(randint(1, 999999)).zfill(6)
 
-    def clean_client_secret(self):
+    def clean_client_secret(self) -> str:
         instance = getattr(self, 'instance', None)
 
         secret = ''
@@ -77,7 +78,7 @@ class CodeAdmin(admin.ModelAdmin):
 
     raw_id_fields = ['user']
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
 
@@ -86,7 +87,7 @@ class TokenAdmin(admin.ModelAdmin):
 
     raw_id_fields = ['user']
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         return False
 
 

@@ -1,19 +1,12 @@
 from hashlib import sha224
 
-import django
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from django.utils.cache import patch_vary_headers
-
+from django.urls import reverse
 from oidc_provider import settings
 
 
-if django.VERSION >= (1, 11):
-    from django.urls import reverse
-else:
-    from django.core.urlresolvers import reverse
-
-
-def redirect(uri):
+def redirect(uri: str) -> HttpResponse:
     """
     Custom Response object for redirecting to a Non-HTTP url scheme.
     """
@@ -22,7 +15,7 @@ def redirect(uri):
     return response
 
 
-def get_site_url(site_url=None, request=None):
+def get_site_url(site_url: str = None, request: HttpRequest = None) -> str:
     """
     Construct the site url.
 
@@ -42,7 +35,7 @@ def get_site_url(site_url=None, request=None):
                         'or pass `request` object.')
 
 
-def get_issuer(site_url=None, request=None):
+def get_issuer(site_url: str = None, request: HttpRequest = None) -> str:
     """
     Construct the issuer full url. Basically is the site url with some path
     appended.
@@ -63,7 +56,7 @@ def default_userinfo(claims, user):
     return claims
 
 
-def default_sub_generator(user):
+def default_sub_generator(user) -> str:
     """
     Default function for setting OIDC_IDTOKEN_SUB_GENERATOR.
     """
@@ -142,7 +135,7 @@ def default_introspection_processing_hook(introspection_response, client, id_tok
     return introspection_response
 
 
-def get_browser_state_or_default(request):
+def get_browser_state_or_default(request: HttpRequest) -> str:
     """
     Determine value to use as session state.
     """
@@ -163,7 +156,7 @@ def run_processing_hook(subject, hook_settings_name, **kwargs):
     return subject
 
 
-def cors_allow_any(request, response):
+def cors_allow_any(request: HttpRequest, response: HttpResponse) -> HttpResponse:
     """
     Add headers to permit CORS requests from any origin, with or without credentials,
     with any headers.

@@ -6,7 +6,7 @@ from oidc_provider.models import RSAKey
 class Command(BaseCommand):
     help = 'Randomly generate a new RSA key for the OpenID server'
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> None:
         try:
             key = RSA.generate(2048)
             rsakey = RSAKey(key=key.exportKey('PEM').decode('utf8'))

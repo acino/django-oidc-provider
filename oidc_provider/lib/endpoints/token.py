@@ -2,6 +2,7 @@ import hashlib
 import inspect
 import logging
 from base64 import urlsafe_b64encode
+from typing import List, Dict, Any
 
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
@@ -34,7 +35,7 @@ class TokenEndpoint(object):
         self.user = None
         self._extract_params()
 
-    def _extract_params(self):
+    def _extract_params(self) -> None:
         client_id, client_secret = extract_client_auth(self.request)
 
         self.params['client_id'] = client_id
@@ -135,11 +136,11 @@ class TokenEndpoint(object):
             logger.debug('[Token] Invalid grant type: %s', self.params['grant_type'])
             raise TokenError('unsupported_grant_type')
 
-    def validate_requested_scopes(self):
+    def validate_requested_scopes(self) -> List[str]:
         """
         Handling validation of requested scope for grant_type=[password|client_credentials]
         """
-        token_scopes = []
+        token_scopes: List[str] = []
         if self.params['scope']:
             # See https://tools.ietf.org/html/rfc6749#section-3.3
             # The value of the scope parameter is expressed
@@ -156,7 +157,7 @@ class TokenEndpoint(object):
             token_scopes.extend(self.client.scope)
         return token_scopes
 
-    def create_response_dic(self):
+    def create_response_dic(self) -> Dict[str, Any]:
         if self.params['grant_type'] == 'authorization_code':
             return self.create_code_response_dic()
         elif self.params['grant_type'] == 'refresh_token':
@@ -166,7 +167,7 @@ class TokenEndpoint(object):
         elif self.params['grant_type'] == 'client_credentials':
             return self.create_client_credentials_response_dic()
 
-    def create_code_response_dic(self):
+    def create_code_response_dic(self) -> Dict[str, Any]:
         # See https://tools.ietf.org/html/rfc6749#section-4.1
 
         token = create_token(
@@ -204,7 +205,7 @@ class TokenEndpoint(object):
 
         return dic
 
-    def create_refresh_response_dic(self):
+    def create_refresh_response_dic(self) -> Dict[str, Any]:
         # See https://tools.ietf.org/html/rfc6749#section-6
 
         scope_param = self.params['scope']
@@ -249,7 +250,7 @@ class TokenEndpoint(object):
 
         return dic
 
-    def create_access_token_response_dic(self):
+    def create_access_token_response_dic(self) -> Dict[str, Any]:
         # See https://tools.ietf.org/html/rfc6749#section-4.3
         token_scopes = self.validate_requested_scopes()
         token = create_token(
@@ -279,7 +280,7 @@ class TokenEndpoint(object):
             'scope': ' '.join(token.scope)
         }
 
-    def create_client_credentials_response_dic(self):
+    def create_client_credentials_response_dic(self) -> Dict[str, Any]:
         # See https://tools.ietf.org/html/rfc6749#section-4.4.3
         token_scopes = self.validate_requested_scopes()
 

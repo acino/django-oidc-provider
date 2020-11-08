@@ -1,8 +1,9 @@
 from base64 import b64decode
 import logging
 import re
+from typing import Tuple
 
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 
 from oidc_provider.lib.errors import BearerTokenError
 from oidc_provider.models import Token
@@ -11,7 +12,7 @@ from oidc_provider.models import Token
 logger = logging.getLogger(__name__)
 
 
-def extract_access_token(request):
+def extract_access_token(request: HttpRequest) -> str:
     """
     Get the access token using Authorization Request Header Field method.
     Or try getting via GET.
@@ -29,7 +30,7 @@ def extract_access_token(request):
     return access_token
 
 
-def extract_client_auth(request):
+def extract_client_auth(request: HttpRequest) -> Tuple[str, str]:
     """
     Get client credentials using HTTP Basic Authentication method.
     Or try getting parameters via POST.
@@ -50,7 +51,7 @@ def extract_client_auth(request):
         client_id = request.POST.get('client_id', '')
         client_secret = request.POST.get('client_secret', '')
 
-    return (client_id, client_secret)
+    return client_id, client_secret
 
 
 def protected_resource_view(scopes=None):

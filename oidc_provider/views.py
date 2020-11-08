@@ -1,25 +1,17 @@
 import logging
-
 from django.views.decorators.csrf import csrf_exempt
 
 from oidc_provider.lib.endpoints.introspection import TokenIntrospectionEndpoint
-try:
-    from urllib import urlencode
-    from urlparse import urlsplit, parse_qs, urlunsplit
-except ImportError:
-    from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
+from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
 
 from Cryptodome.PublicKey import RSA
 from django.contrib.auth.views import (
     redirect_to_login,
     LogoutView,
 )
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth import logout as django_user_logout
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpRequest, HttpResponseNotAllowed
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
@@ -64,7 +56,7 @@ OIDC_TEMPLATES = settings.get('OIDC_TEMPLATES')
 class AuthorizeView(View):
     authorize_endpoint_class = AuthorizeEndpoint
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         authorize = self.authorize_endpoint_class(request)
 
         try:
@@ -168,7 +160,7 @@ class AuthorizeView(View):
 
             return redirect(uri)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         authorize = self.authorize_endpoint_class(request)
 
         try:
@@ -205,7 +197,7 @@ class AuthorizeView(View):
 class TokenView(View):
     token_endpoint_class = TokenEndpoint
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
         token = self.token_endpoint_class(request)
 
         try:
@@ -223,7 +215,7 @@ class TokenView(View):
 
 @require_http_methods(['GET', 'POST', 'OPTIONS'])
 @protected_resource_view(['openid'])
-def userinfo(request, *args, **kwargs):
+def userinfo(request: HttpRequest, *args, **kwargs):
     """
     Create a dictionary with all the requested claims about the End-User.
     See: http://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse
@@ -231,7 +223,7 @@ def userinfo(request, *args, **kwargs):
     Return a dictionary.
     """
 
-    def set_headers(response):
+    def set_headers(response: HttpResponse) -> HttpResponse:
         response['Cache-Control'] = 'no-store'
         response['Pragma'] = 'no-cache'
         cors_allow_any(request, response)
@@ -260,7 +252,7 @@ def userinfo(request, *args, **kwargs):
 
 
 class ProviderInfoView(View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
         dic = dict()
 
         site_url = get_site_url(request=request)
@@ -295,7 +287,7 @@ class ProviderInfoView(View):
 
 
 class JwksView(View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
         dic = dict(keys=[])
 
         for rsakey in RSAKey.objects.all():
@@ -316,7 +308,7 @@ class JwksView(View):
 
 
 class EndSessionView(LogoutView):
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         id_token_hint = request.GET.get('id_token_hint', '')
         post_logout_redirect_uri = request.GET.get('post_logout_redirect_uri', '')
         state = request.GET.get('state', '')
@@ -356,10 +348,10 @@ class EndSessionView(LogoutView):
 
 class CheckSessionIframeView(View):
     @method_decorator(xframe_options_exempt)
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseNotAllowed:
         return super(CheckSessionIframeView, self).dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         return render(request, 'oidc_provider/check_session_iframe.html', kwargs)
 
 
@@ -367,10 +359,10 @@ class TokenIntrospectionView(View):
     token_instrospection_endpoint_class = TokenIntrospectionEndpoint
 
     @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseNotAllowed:
         return super(TokenIntrospectionView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: HttpRequest, *args, **kwargs) -> JsonResponse:
         introspection = self.token_instrospection_endpoint_class(request)
 
         try:
